@@ -1,4 +1,4 @@
-package olizarovich.probation.rest.flyway.postqresql;
+package olizarovich.probation.rest.repositories;
 
 import olizarovich.probation.rest.models.Document;
 import org.springframework.data.domain.Page;

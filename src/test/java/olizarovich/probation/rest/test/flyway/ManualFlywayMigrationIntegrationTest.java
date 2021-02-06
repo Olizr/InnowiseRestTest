@@ -1,4 +1,4 @@
-package olizarovich.probation.rest.flyway.postqresql;
+package olizarovich.probation.rest.test.flyway;
 
 import org.flywaydb.test.FlywayTestExecutionListener;
 import org.flywaydb.test.annotation.FlywayTest;
