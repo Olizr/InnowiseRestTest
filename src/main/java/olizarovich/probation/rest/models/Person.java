@@ -2,17 +2,21 @@ package olizarovich.probation.rest.models;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.time.LocalDate;
 import java.util.Objects;
 
 /**
 * The Person class is data class for holding information
 */
+@Entity
 public class Person {
 
     /**
      * Integer field. Contains primary key in class
      */
+    @Id
     private int id;
 
     /**

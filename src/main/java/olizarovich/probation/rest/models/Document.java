@@ -1,18 +1,22 @@
 package olizarovich.probation.rest.models;
 
+import org.springframework.data.annotation.Id;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.persistence.Entity;
 import java.time.LocalDate;
 import java.util.Objects;
 
 /**
  * The Document class is data class for holding information
  */
+@Entity
 public class Document {
 
     /**
      * Integer field. Contains primary key in class
      */
+    @Id
     private int id;
 
     /**
