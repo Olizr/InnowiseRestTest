@@ -2,8 +2,7 @@ package olizarovich.probation.rest.models;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -17,6 +16,7 @@ public class Person {
      * Integer field. Contains primary key in class
      */
     @Id
+    @GeneratedValue( strategy= GenerationType.IDENTITY)
     private int id;
 
     /**
@@ -37,24 +37,28 @@ public class Person {
     private LocalDate birthDate;
 
     /**
+     * Boolean type field. Field for soft delete
+     */
+    private boolean isDeleted;
+
+    /**
      * Empty class constructor.
      */
     public Person() {
-
+        this.isDeleted = false;
     }
 
     /**
      * Class constructor with all fields
-     * @param id Integer primary key
      * @param firstName String first name
      * @param lastName String last name
      * @param birthDate LocalDate birth date
      */
-    public Person(int id, String firstName, String lastName, LocalDate birthDate) {
-        this.id = id;
+    public Person(String firstName, String lastName, LocalDate birthDate) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
+        this.isDeleted = false;
     }
 
     /**
@@ -111,5 +115,13 @@ public class Person {
 
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

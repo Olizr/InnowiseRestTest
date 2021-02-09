@@ -1,9 +1,8 @@
 package olizarovich.probation.rest.models;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Entity;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -17,6 +16,7 @@ public class Document {
      * Integer field. Contains primary key in class
      */
     @Id
+    @GeneratedValue( strategy= GenerationType.IDENTITY)
     private int id;
 
     /**
@@ -44,43 +44,29 @@ public class Document {
     private LocalDate executionPeriod;
 
     /**
-     * Integer field. Contains foreign key for customer
-     */
-    private int customerId;
-
-    /**
      * Person type field. Contains customer
      */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "customer_id")
     private Person customer;
 
     /**
-     * Integer field. Contains foreign key for executor
+     * Person type field. Contains executor
      */
-    private int executorId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "executor_id")
+    private Person executor;
 
     /**
-     * Person type field. Contains executo
+     * Boolean type field. Field for soft delete
      */
-    private Person executor;
+    private boolean isDeleted;
 
     /**
      * Empty class constructor.
      */
     public Document() {
-
-    }
-
-    /**
-     * Class constructor with all fields, except customer and executor
-     */
-    public Document(int id, String title, String status, LocalDate creationDate, LocalDate executionPeriod, int customerId, int executorId) {
-        this.id = id;
-        this.title = title;
-        this.status = status;
-        this.creationDate = creationDate;
-        this.executionPeriod = executionPeriod;
-        this.customerId = customerId;
-        this.executorId = executorId;
+        isDeleted = false;
     }
 
     /**
@@ -155,27 +141,19 @@ public class Document {
         this.executor = executor;
     }
 
-    public int getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
-    }
-
-    public int getExecutorId() {
-        return executorId;
-    }
-
-    public void setExecutorId(int executorId) {
-        this.executorId = executorId;
-    }
-
     public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

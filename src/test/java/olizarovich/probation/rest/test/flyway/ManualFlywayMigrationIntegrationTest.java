@@ -44,8 +44,7 @@ public class ManualFlywayMigrationIntegrationTest {
     }
 
     /**
-     * Made a clean init migrate usage before execution of test methods
-     * <p>
+     * Test without migration
      * Expected error due to missing table
      */
     @Test(expected = PSQLException.class)

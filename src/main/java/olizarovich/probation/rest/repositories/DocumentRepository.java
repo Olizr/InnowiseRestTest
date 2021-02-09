@@ -5,68 +5,62 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DocumentRepository extends CrudRepository<Document, Long> {
+public interface DocumentRepository extends JpaRepository<Document, Integer> {
+    /**
+     * Methods to find specific documents
+     * @param specification Filter settings
+     * @return Documents that matches filter
+     */
+    List<Document> findAll(Specification<Document> specification);
 
-    Iterable<Document> findAll(Sort sort);
+    /**
+     * Methods to find specific documents separated by pages
+     * @param specification Filter settings
+     * @param pageable Page settings
+     * @return Documents that matches filter
+     */
+    Page<Document> findAll(Specification<Document> specification, Pageable pageable);
 
-    Iterable<Document> findAll(Specification<Document> filter);
+    /**
+     * Methods to find all documents that been soft deleted
+     * @return Documents with column "isDeleted" set to true
+     */
+    @Query("select e from Document e where e.isDeleted=true")
+    List<Document> recycleBin();
 
-    Page<Document> findAll(Sort sort, Specification<Document> filter);
+    /**
+     * Soft deleted documents by setting column "isDeleted" to true
+     * @param id Id of a document to soft delete
+     */
+    @Query("update Document e set e.isDeleted=true where e.id=?1")
+    @Modifying
+    void softDeleteById(int id);
 
-    Page<Document> findAll(Pageable pageable);
+    /**
+     * Soft deleted document by setting column "isDeleted" to true
+     * @param document Document to soft delete
+     */
+    @Query("update Document e set e.isDeleted=true where e.id=:#{#document.id}")
+    @Modifying
+    void softDelete(@Param("document") Document document);
 
-    Page<Document> findAll(Pageable pageable, Sort sort);
-
-    Page<Document> findAll(Pageable pageable, Specification<Document> filter);
-
-    Page<Document> findByCustomerId(Long customerId, Sort sort);
-
-    Page<Document> findByCustomerId(Long customerId, Pageable pageable);
-
-    Page<Document> findByCustomerId(Long customerId, Pageable pageable, Sort sort);
-
-    Page<Document> findByCustomerId_Lastname(String lastname, Sort sort);
-
-    Page<Document> findByCustomerId_Lastname(Long lastname, Pageable pageable);
-
-    Page<Document> findByCustomerId_Lastname(Long lastname, Pageable pageable, Sort sort);
-
-    @Override
-    <S extends Document> S save(S s);
-
-    @Override
-    void deleteAll();
-
-    @Override
-    <S extends Document> Iterable<S> saveAll(Iterable<S> iterable);
-
-    @Override
-    Optional<Document> findById(Long aLong);
-
-    @Override
-    boolean existsById(Long aLong);
-
-    @Override
-    Iterable<Document> findAll();
-
-    @Override
-    Iterable<Document> findAllById(Iterable<Long> iterable);
-
-    @Override
-    long count();
-
-    @Override
-    void deleteById(Long aLong);
-
-    @Override
-    void delete(Document document);
-
-    @Override
-    void deleteAll(Iterable<? extends Document> iterable);
+    /**
+     * Soft deleted document by setting column "isDeleted" to true
+     * @param documentIds List of Integer of documents to delete
+     */
+    @Query("update Document e set e.isDeleted=true where e.id IN :ids")
+    @Modifying
+    void softDeleteAll(@Param("ids") Collection<Integer> documentIds);
 }

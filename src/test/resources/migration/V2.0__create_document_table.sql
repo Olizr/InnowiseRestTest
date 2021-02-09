@@ -5,5 +5,6 @@ CREATE TABLE Document (
 	creation_date DATE NOT NULL,
 	execution_period DATE NOT NULL,
 	customer_id INT REFERENCES Person (id),
-	executor_id INT REFERENCES Person (id)
+	executor_id INT REFERENCES Person (id),
+	is_deleted BOOLEAN NOT NULL
 );
