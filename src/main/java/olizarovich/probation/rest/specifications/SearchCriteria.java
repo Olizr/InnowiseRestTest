@@ -1,5 +1,8 @@
 package olizarovich.probation.rest.specifications;
 
+/**
+ * Class for holding criteria data
+ */
 public class SearchCriteria {
     private String key;
     private String operation;

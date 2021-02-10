@@ -3,7 +3,6 @@ package olizarovich.probation.rest.test.repositories;
 import olizarovich.probation.rest.models.Document;
 import olizarovich.probation.rest.models.Person;
 import olizarovich.probation.rest.repositories.DocumentRepository;
-import olizarovich.probation.rest.repositories.PersonRepository;
 import olizarovich.probation.rest.specifications.SpecificationsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.print.Doc;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -53,6 +51,7 @@ public class DocumentRepositoryIntegrationTest {
 
     /**
      * Load list of persons to database
+     *
      * @param persons List of persons to insert
      */
     private void loadPersonsDate(List<Person> persons) {
@@ -64,18 +63,19 @@ public class DocumentRepositoryIntegrationTest {
 
     /**
      * Creates 9 documents entities. Users list of person for fields.
+     *
      * @param persons List of persons for foreign Key
      * @return List of persons
      */
     private List<Document> createDocumentsData(List<Person> persons) {
         ArrayList<Document> documents = new ArrayList<>();
-        String[] documentsStatus =  new String[] {"Ready", "In progress", "Unknown"};
+        String[] documentsStatus = new String[]{"Ready", "In progress", "Unknown"};
 
-        for (Person i: persons) {
+        for (Person i : persons) {
             int statusNumber = 0;
-            for (Person j: persons) {
+            for (Person j : persons) {
                 Document document = new Document();
-                document.setTitle(i.getFirstName()+"Document");
+                document.setTitle(i.getFirstName() + "Document");
                 document.setStatus(documentsStatus[statusNumber]);
                 document.setCreationDate(LocalDate.of(2000, 1, 1).plusMonths(statusNumber));
                 document.setExecutionPeriod(LocalDate.of(2000, 2, 1).plusMonths(statusNumber));
@@ -92,6 +92,7 @@ public class DocumentRepositoryIntegrationTest {
 
     /**
      * Creates and inserts document entities to database
+     *
      * @return List of document with Ids
      */
     private List<Document> initTestData() {
@@ -157,7 +158,7 @@ public class DocumentRepositoryIntegrationTest {
         List<Document> documents = initTestData();
 
         SpecificationsBuilder<Document> specificationsBuilder = new SpecificationsBuilder<>();
-        specificationsBuilder.with("customer_id", ":", documents.get(0).getCustomer().getId());
+        specificationsBuilder.with("customer.id", ":", documents.get(0).getCustomer().getId());
 
         List<Document> found = documentRepository.findAll(specificationsBuilder.build());
 

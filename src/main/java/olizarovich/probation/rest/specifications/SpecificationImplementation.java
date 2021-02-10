@@ -1,15 +1,15 @@
 package olizarovich.probation.rest.specifications;
 
-import olizarovich.probation.rest.models.Person;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 
-import static olizarovich.probation.rest.specifications.SearchOperation.*;
+import static olizarovich.probation.rest.specifications.SearchOperation.getSimpleOperation;
 
+/**
+ * Class for creation search predicate based of SearchCriteria
+ * @param <T> Class in witch we searching
+ */
 public class SpecificationImplementation<T> implements Specification<T> {
     private SearchCriteria criteria;
 
@@ -32,19 +32,42 @@ public class SpecificationImplementation<T> implements Specification<T> {
 
         switch (searchOperation) {
             case EQUALITY:
-                return builder.equal(root.get(criteria.getKey()), criteria.getValue());
+                return builder.equal(buildPath(criteria.getKey(), root), criteria.getValue());
             case NEGATION:
-                return builder.notEqual(root.get(criteria.getKey()), criteria.getValue());
+                return builder.notEqual(buildPath(criteria.getKey(), root), criteria.getValue());
             case GREATER_THAN:
                 return builder.greaterThanOrEqualTo(
-                        root.get(criteria.getKey()), criteria.getValue().toString());
+                        buildPath(criteria.getKey(), root), criteria.getValue().toString());
             case LESS_THAN:
                 return builder.lessThanOrEqualTo(
-                        root.get(criteria.getKey()), criteria.getValue().toString());
+                        buildPath(criteria.getKey(), root), criteria.getValue().toString());
             case LIKE:
-                return builder.like(root.get(criteria.getKey()), "%" + criteria.getValue().toString() + "%");
+                return builder.like(buildPath(criteria.getKey(), root), "%" + criteria.getValue().toString() + "%");
             default:
                 return null;
         }
+    }
+
+    /**
+     * Creates correct base based on key
+     * @param key Search key
+     * @param root Root
+     * @param <R> Type of path
+     * @return Path with correct path
+     */
+    private <R> Path<R> buildPath(String key, Root<T> root) {
+        String[] keyParts = key.split("\\.");
+        Path<R> expression = null;
+
+        for (String i: keyParts) {
+            if (expression == null) {
+                expression = root.get(i);
+            }
+            else {
+                expression = expression.get(i);
+            }
+        }
+
+        return expression;
     }
 }
