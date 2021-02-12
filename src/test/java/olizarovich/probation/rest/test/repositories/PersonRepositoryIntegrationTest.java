@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -99,7 +98,7 @@ public class PersonRepositoryIntegrationTest {
 
         List<Person> found = personRepository.findAll(specificationsBuilder.build());
 
-        assertEquals(found.size(), 1);
+        assertEquals(1, found.size());
     }
 
     /**
@@ -170,9 +169,9 @@ public class PersonRepositoryIntegrationTest {
 
         Person person = personRepository.findAll(specificationsBuilder.build()).get(0);
 
-        personRepository.softDeleteById(person.getId());
+        personRepository.deleteById(person.getId());
 
-        assertEquals(1, personRepository.recycleBin().size());
+        assertEquals(1, personRepository.findByIsDeleted(true).size());
     }
 
     /**
@@ -186,9 +185,9 @@ public class PersonRepositoryIntegrationTest {
 
         Person person = personRepository.findById(persons.get(0).getId()).get();
 
-        personRepository.softDelete(person);
+        personRepository.delete(person);
 
-        assertEquals(1, personRepository.recycleBin().size());
+        assertEquals(1, personRepository.findByIsDeleted(true).size());
     }
 
     /**
@@ -205,9 +204,20 @@ public class PersonRepositoryIntegrationTest {
             personsToDelete.add(persons.get(i));
         }
 
-        personRepository.softDeleteAll(personsToDelete.stream().mapToInt(Person::getId).boxed()
-                .collect(Collectors.toList()));
+        personRepository.deleteAll(personsToDelete);
 
-        assertEquals(3, personRepository.recycleBin().size());
+        assertEquals(3, personRepository.findByIsDeleted(true).size());
+    }
+
+    @Test
+    public void testCountWithFilter() {
+        List<Person> persons = initTestData();
+        initDatabase(persons);
+
+        SpecificationsBuilder<Person> specificationsBuilder = new SpecificationsBuilder<>();
+        specificationsBuilder.with("firstName", ":", "alex2");
+        long found = personRepository.count(specificationsBuilder.build());
+
+        assertEquals(1, found);
     }
 }

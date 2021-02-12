@@ -3,7 +3,9 @@ package olizarovich.probation.rest.specifications;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -14,10 +16,10 @@ public class SpecificationsBuilder<T> {
     /**
      * Contains criteria for search
      */
-    private final List<SearchCriteria> params;
+    private final Map<String, SearchCriteria> params;
 
     public SpecificationsBuilder() {
-        params = new ArrayList<SearchCriteria>();
+        params = new HashMap<String, SearchCriteria>();
     }
 
     /**
@@ -28,7 +30,7 @@ public class SpecificationsBuilder<T> {
      * @return SpecificationsBuilder with added criteria
      */
     public SpecificationsBuilder with(String key, String operation, Object value) {
-        params.add(new SearchCriteria(key, operation, value));
+        params.put(key, new SearchCriteria(key, operation, value));
         return this;
     }
 
@@ -41,7 +43,7 @@ public class SpecificationsBuilder<T> {
             return null;
         }
 
-        List<Specification> specs = params.stream()
+        List<Specification> specs = params.values().stream()
                 .map(SpecificationImplementation::new)
                 .collect(Collectors.toList());
 

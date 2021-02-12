@@ -16,37 +16,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository for Document entity with soft deletion
+ */
 @Repository
-public interface DocumentRepository extends JpaRepository<Document, Integer> {
-    /**
-     * Methods to find specific documents
-     * @param specification Filter settings
-     * @return Documents that matches filter
-     */
-    List<Document> findAll(Specification<Document> specification);
-
-    /**
-     * Methods to find specific documents separated by pages
-     * @param specification Filter settings
-     * @param pageable Page settings
-     * @return Documents that matches filter
-     */
-    Page<Document> findAll(Specification<Document> specification, Pageable pageable);
-
-    /**
-     * Methods to find all documents that been soft deleted
-     * @return Documents with column "isDeleted" set to true
-     */
-    @Query("select e from Document e where e.isDeleted=true")
-    List<Document> recycleBin();
-
+public interface DocumentRepository extends CrudSoftDeleteRepository<Document, Integer> {
     /**
      * Soft deleted documents by setting column "isDeleted" to true
      * @param id Id of a document to soft delete
      */
     @Query("update Document e set e.isDeleted=true where e.id=?1")
     @Modifying
-    void softDeleteById(int id);
+    @Override
+    void deleteById(Integer id);
 
     /**
      * Soft deleted document by setting column "isDeleted" to true
@@ -54,13 +36,24 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
      */
     @Query("update Document e set e.isDeleted=true where e.id=:#{#document.id}")
     @Modifying
-    void softDelete(@Param("document") Document document);
+    @Override
+    void delete(@Param("document") Document document);
 
     /**
-     * Soft deleted document by setting column "isDeleted" to true
-     * @param documentIds List of Integer of documents to delete
+     * Soft deleted documents by setting column "isDeleted" to true
+     * @param entities List of persons to delete
      */
-    @Query("update Document e set e.isDeleted=true where e.id IN :ids")
     @Modifying
-    void softDeleteAll(@Param("ids") Collection<Integer> documentIds);
+    @Override
+    default void deleteAll(Iterable<? extends Document> entities) {
+        entities.forEach(entity -> deleteById(entity.getId()));
+    }
+
+    /**
+     * Soft deleted all persons by setting column "isDeleted" to true
+     */
+    @Query("update Document e set e.isDeleted=true")
+    @Modifying
+    @Override
+    void deleteAll();
 }

@@ -16,37 +16,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository for Person entity with soft deletion
+ */
 @Repository
-public interface PersonRepository extends JpaRepository<Person, Integer> {
-    /**
-     * Methods to find specific persons
-     * @param specification Filter settings
-     * @return Persons that matches filter
-     */
-    List<Person> findAll(Specification<Person> specification);
-
-    /**
-     * Methods to find specific persons separated by pages
-     * @param specification Filter settings
-     * @param pageable Page settings
-     * @return Persons that matches filter
-     */
-    Page<Person> findAll(Specification<Person> specification, Pageable pageable);
-
-    /**
-     * Methods to find all person that been soft deleted
-     * @return Persons with column "isDeleted" set to true
-     */
-    @Query("select e from Person e where e.isDeleted=true")
-    List<Person> recycleBin();
-
+public interface PersonRepository extends CrudSoftDeleteRepository<Person, Integer> {
     /**
      * Soft deleted person by setting column "isDeleted" to true
      * @param id Id of a person to soft delete
      */
     @Query("update Person e set e.isDeleted=true where e.id=?1")
     @Modifying
-    void softDeleteById(int id);
+    @Override
+    void deleteById(Integer id);
 
     /**
      * Soft deleted person by setting column "isDeleted" to true
@@ -54,13 +36,24 @@ public interface PersonRepository extends JpaRepository<Person, Integer> {
      */
     @Query("update Person e set e.isDeleted=true where e.id=:#{#person.id}")
     @Modifying
-    void softDelete(@Param("person") Person person);
+    @Override
+    void delete(@Param("person") Person person);
 
     /**
      * Soft deleted person by setting column "isDeleted" to true
-     * @param personsIds List of Integer of persons to delete
+     * @param entities List of persons to delete
      */
-    @Query("update Person e set e.isDeleted=true where e.id IN :ids")
     @Modifying
-    void softDeleteAll(@Param("ids") Collection<Integer> personsIds);
+    @Override
+    default void deleteAll(Iterable<? extends Person> entities) {
+        entities.forEach(entity -> deleteById(entity.getId()));
+    }
+
+    /**
+     * Soft deleted all persons by setting column "isDeleted" to true
+     */
+    @Query("update Person e set e.isDeleted=true")
+    @Modifying
+    @Override
+    void deleteAll();
 }

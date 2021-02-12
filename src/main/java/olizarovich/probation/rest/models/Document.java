@@ -17,7 +17,7 @@ public class Document {
      */
     @Id
     @GeneratedValue( strategy= GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     /**
      * String field. Contains title of the document
@@ -46,21 +46,21 @@ public class Document {
     /**
      * Person type field. Contains customer
      */
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "customer_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
     private Person customer;
 
     /**
      * Person type field. Contains executor
      */
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "executor_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "executor_id", nullable = false)
     private Person executor;
 
     /**
      * Boolean type field. Field for soft delete
      */
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     /**
      * Empty class constructor.
@@ -79,7 +79,7 @@ public class Document {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Document document = (Document) o;
-        return id == document.id &&
+        return id.equals(document.id) &&
                 Objects.equals(title, document.title) &&
                 Objects.equals(creationDate, document.creationDate);
     }
@@ -93,11 +93,11 @@ public class Document {
         return Objects.hash(id, title, creationDate);
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -149,11 +149,11 @@ public class Document {
         this.status = status;
     }
 
-    public boolean getDeleted() {
+    public Boolean getDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 }

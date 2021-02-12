@@ -3,21 +3,18 @@ package olizarovich.probation.rest.test.repositories;
 import olizarovich.probation.rest.models.Document;
 import olizarovich.probation.rest.models.Person;
 import olizarovich.probation.rest.repositories.DocumentRepository;
+import olizarovich.probation.rest.repositories.PersonRepository;
 import olizarovich.probation.rest.specifications.SpecificationsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -34,6 +31,8 @@ public class DocumentRepositoryIntegrationTest {
     @Autowired
     private DocumentRepository documentRepository;
 
+    @Autowired
+    private PersonRepository personRepository;
     /**
      * Creates 3 persons entities
      *
@@ -76,7 +75,7 @@ public class DocumentRepositoryIntegrationTest {
             for (Person j : persons) {
                 Document document = new Document();
                 document.setTitle(i.getFirstName() + "Document");
-                document.setStatus(documentsStatus[statusNumber]);
+                document.setStatus(documentsStatus[statusNumber % 3]);
                 document.setCreationDate(LocalDate.of(2000, 1, 1).plusMonths(statusNumber));
                 document.setExecutionPeriod(LocalDate.of(2000, 2, 1).plusMonths(statusNumber));
                 document.setCustomer(i);
@@ -155,6 +154,7 @@ public class DocumentRepositoryIntegrationTest {
      */
     @Test
     public void testEqualFilterForeignKey() {
+
         List<Document> documents = initTestData();
 
         SpecificationsBuilder<Document> specificationsBuilder = new SpecificationsBuilder<>();
@@ -226,9 +226,9 @@ public class DocumentRepositoryIntegrationTest {
     public void testSoftDeleteById() {
         List<Document> documents = initTestData();
 
-        documentRepository.softDeleteById(documents.get(0).getId());
+        documentRepository.deleteById(documents.get(0).getId());
 
-        assertEquals(1, documentRepository.recycleBin().size());
+        assertEquals(1, documentRepository.findByIsDeleted(true).size());
     }
 
     /**
@@ -239,9 +239,9 @@ public class DocumentRepositoryIntegrationTest {
     public void testSoftDelete() {
         List<Document> documents = initTestData();
 
-        documentRepository.softDelete(documents.get(0));
+        documentRepository.delete(documents.get(0));
 
-        assertEquals(1, documentRepository.recycleBin().size());
+        assertEquals(1, documentRepository.findByIsDeleted(true).size());
     }
 
     /**
@@ -257,9 +257,8 @@ public class DocumentRepositoryIntegrationTest {
             documentsToDelete.add(documents.get(i));
         }
 
-        documentRepository.softDeleteAll(documentsToDelete.stream().mapToInt(Document::getId).boxed()
-                .collect(Collectors.toList()));
+        documentRepository.deleteAll(documentsToDelete);
 
-        assertEquals(3, documentRepository.recycleBin().size());
+        assertEquals(3, documentRepository.findByIsDeleted(true).size());
     }
 }

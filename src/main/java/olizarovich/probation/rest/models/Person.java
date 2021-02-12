@@ -4,7 +4,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
 * The Person class is data class for holding information
@@ -17,7 +20,7 @@ public class Person {
      */
     @Id
     @GeneratedValue( strategy= GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     /**
      * String field. Contains person first name
@@ -39,7 +42,7 @@ public class Person {
     /**
      * Boolean type field. Field for soft delete
      */
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     /**
      * Empty class constructor.
@@ -85,11 +88,11 @@ public class Person {
         return Objects.hash(id, firstName, lastName);
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -117,11 +120,11 @@ public class Person {
         this.birthDate = birthDate;
     }
 
-    public boolean isDeleted() {
+    public Boolean isDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 }
