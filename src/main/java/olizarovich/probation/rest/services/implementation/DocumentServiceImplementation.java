@@ -1,5 +1,6 @@
 package olizarovich.probation.rest.services.implementation;
 
+import olizarovich.probation.rest.exceptions.DocumentNotFoundException;
 import olizarovich.probation.rest.models.Document;
 import olizarovich.probation.rest.repositories.DocumentRepository;
 import olizarovich.probation.rest.services.DocumentService;
@@ -42,6 +43,21 @@ public class DocumentServiceImplementation extends CrudImplementation<Document, 
     }
 
     @Override
+    public Document update(Document document, Integer ids) {
+        boolean entityIllegal = verifyEntity(document);
+
+        if(entityIllegal) {
+            throw new IllegalArgumentException();
+        }
+
+        Document documentToUpdate = findById(ids).orElseThrow(() -> new DocumentNotFoundException(ids));
+
+        documentToUpdate.setId(documentToUpdate.getId());
+
+        return super.save(document);
+    }
+
+    @Override
     public DocumentService setSort(DocumentService.DocumentSort sort) {
         this.sort = Sort.by(sort.getSortOrder());
         return this;
@@ -49,86 +65,112 @@ public class DocumentServiceImplementation extends CrudImplementation<Document, 
 
     @Override
     public DocumentService filterByTitle(String title) {
-        specificationsBuilder.with("title", "~", title);
+        if(!title.isEmpty())
+            specificationsBuilder.with("title", "~", title);
         return this;
     }
 
     @Override
     public DocumentService filterByStatus(String status) {
-        specificationsBuilder.with("status", "~", status);
-        return null;
+        if(!status.isEmpty())
+            specificationsBuilder.with("status", "~", status);
+        return this;
     }
 
     @Override
     public DocumentService filterByCreationDate(LocalDate date) {
-        specificationsBuilder.with("creationDate", ":", date);
-        return null;
+        if(date != null)
+            specificationsBuilder.with("creationDate", ":", date);
+        return this;
     }
 
     @Override
     public DocumentService filterByCreationDateMoreThan(LocalDate date) {
-        specificationsBuilder.with("creationDate", ">", date);
-        return null;
+        if(date != null)
+            specificationsBuilder.with("creationDate", ">", date);
+        return this;
     }
 
     @Override
     public DocumentService filterByCreationDateLessThan(LocalDate date) {
-        specificationsBuilder.with("creationDate", "<", date);
-        return null;
+        if(date != null)
+            specificationsBuilder.with("creationDate", "<", date);
+        return this;
     }
 
     @Override
     public DocumentService filterByExecutionDate(LocalDate date) {
-        specificationsBuilder.with("executionDate", ":", date);
-        return null;
+        if(date != null)
+            specificationsBuilder.with("executionDate", ":", date);
+        return this;
     }
 
     @Override
     public DocumentService filterByExecutionDateMoreThan(LocalDate date) {
-        specificationsBuilder.with("executionDate", ">", date);
-        return null;
+        if(date != null)
+            specificationsBuilder.with("executionDate", ">", date);
+        return this;
     }
 
     @Override
     public DocumentService filterByExecutionDateLessThan(LocalDate date) {
-        specificationsBuilder.with("executionDate", "<", date);
-        return null;
+        if(date != null)
+            specificationsBuilder.with("executionDate", "<", date);
+        return this;
     }
 
     @Override
     public DocumentService filterByCustomerId(int id) {
-        specificationsBuilder.with("customer.id", ":", id);
-        return null;
+        if(id > -1)
+            specificationsBuilder.with("customer.id", ":", id);
+        return this;
     }
 
     @Override
     public DocumentService filterByCustomerFirstName(String firstName) {
-        specificationsBuilder.with("customer.firstName", "~", firstName);
-        return null;
+        if(!firstName.isEmpty())
+            specificationsBuilder.with("customer.firstName", "~", firstName);
+        return this;
     }
 
     @Override
     public DocumentService filterByCustomerLastName(String lastName) {
-        specificationsBuilder.with("customer.lastName", "~", lastName);
-        return null;
+        if(!lastName.isEmpty())
+            specificationsBuilder.with("customer.lastName", "~", lastName);
+        return this;
     }
 
     @Override
     public DocumentService filterByExecutorId(int id) {
-        specificationsBuilder.with("executor.id", ":", id);
-        return null;
+        if(id > -1)
+            specificationsBuilder.with("executor.id", ":", id);
+        return this;
     }
 
     @Override
     public DocumentService filterByExecutorFirstName(String firstName) {
-        specificationsBuilder.with("executor.firstName", "~", firstName);
-
-        return null;
+        if(!firstName.isEmpty())
+            specificationsBuilder.with("executor.firstName", "~", firstName);
+        return this;
     }
 
     @Override
     public DocumentService filterByExecutorLastName(String lastName) {
-        specificationsBuilder.with("executor.lastName", "~", lastName);
-        return null;
+        if(!lastName.isEmpty())
+            specificationsBuilder.with("executor.lastName", "~", lastName);
+        return this;
+    }
+
+    @Override
+    public boolean verifyEntity(Document document) {
+        boolean entityIllegal = false;
+        entityIllegal = document.getTitle().isEmpty() || entityIllegal;
+        entityIllegal = document.getStatus().isEmpty() || entityIllegal;
+        entityIllegal = document.getCreationDate() == null || entityIllegal;
+        entityIllegal = document.getExecutionPeriod() == null || entityIllegal;
+        entityIllegal = document.getCustomer().getId() == null || entityIllegal;
+        entityIllegal = document.getExecutor().getId() == null || entityIllegal;
+
+        return entityIllegal;
     }
 }

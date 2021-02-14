@@ -1,5 +1,6 @@
 package olizarovich.probation.rest.services.implementation;
 
+import olizarovich.probation.rest.exceptions.PersonNotFoundException;
 import olizarovich.probation.rest.models.Person;
 import olizarovich.probation.rest.repositories.PersonRepository;
 import olizarovich.probation.rest.services.PersonService;
@@ -44,6 +45,21 @@ public class PersonServiceImplementation extends CrudImplementation<Person, Inte
     }
 
     @Override
+    public Person update(Person person, Integer ids) {
+        boolean entityIllegal = verifyEntity(person);
+
+        if(entityIllegal) {
+            throw new IllegalArgumentException();
+        }
+
+        Person personToUpdate = findById(ids).orElseThrow(() -> new PersonNotFoundException(ids));
+
+        person.setId(personToUpdate.getId());
+
+        return super.save(person);
+    }
+
+    @Override
     public PersonService setSort(PersonSort sort) {
         this.sort = Sort.by(sort.getSortOrder());
         return this;
@@ -51,31 +67,49 @@ public class PersonServiceImplementation extends CrudImplementation<Person, Inte
 
     @Override
     public PersonService filterByFirstName(String firstName) {
-        specificationsBuilder.with("firstName", "~", firstName);
+        if (!firstName.isEmpty())
+            specificationsBuilder.with("firstName", "~", firstName);
         return this;
     }
 
     @Override
     public PersonService filterByLastName(String lastName) {
-        specificationsBuilder.with("lastName", "~", lastName);
+        if (!lastName.isEmpty())
+            specificationsBuilder.with("lastName", "~", lastName);
         return this;
     }
 
     @Override
     public PersonService filterByBirthDate(LocalDate date) {
-        specificationsBuilder.with("birthDate", ":", date);
+        if (date != null)
+            specificationsBuilder.with("birthDate", ":", date);
         return this;
     }
 
     @Override
     public PersonService filterByBirthDateMoreThan(LocalDate date) {
-        specificationsBuilder.with("birthDate", ">", date);
+        if (date != null)
+            specificationsBuilder.with("birthDate", ">", date);
         return this;
     }
 
     @Override
     public PersonService filterByBirthDateLessThan(LocalDate date) {
-        specificationsBuilder.with("birthDate", "<", date);
+        if (date != null)
+            specificationsBuilder.with("birthDate", "<", date);
         return this;
+    }
+
+    /**
+     * Verifying fileds
+     * @return True if all field correct
+     */
+    public boolean verifyEntity(Person person) {
+        boolean entityIllegal = false;
+        entityIllegal = person.getFirstName().isEmpty() || entityIllegal;
+        entityIllegal = person.getLastName().isEmpty() || entityIllegal;
+        entityIllegal = person.getBirthDate() == null || entityIllegal;
+
+        return entityIllegal;
     }
 }

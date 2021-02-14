@@ -34,6 +34,8 @@ public interface Crud<T, ID> {
 
     void deleteAll();
 
+    T update(T entity, ID ids);
+
     /**
      * Searching for soft deleted entities only
      *

@@ -1,5 +1,6 @@
 package olizarovich.probation.rest.services.implementation;
 
+import olizarovich.probation.rest.models.Person;
 import olizarovich.probation.rest.repositories.CrudSoftDeleteRepository;
 import olizarovich.probation.rest.services.Crud;
 import olizarovich.probation.rest.specifications.SpecificationsBuilder;
@@ -42,11 +43,21 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
 
     @Override
     public T save(T entity) {
+        if(verifyEntity(entity)) {
+            throw new IllegalArgumentException();
+        }
+
         return repository.save(entity);
     }
 
     @Override
     public Iterable<T> saveAll(Iterable<T> entities) {
+        for (T i : entities) {
+            if (verifyEntity(i)) {
+                throw new IllegalArgumentException();
+            }
+        }
+
         return repository.saveAll(entities);
     }
 
@@ -138,6 +149,17 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
         searchForDeleted = false;
     }
 
+    @Override
+    public T update(T entity, ID ids) {
+        boolean entityIllegal = verifyEntity(entity);
+
+        if(entityIllegal) {
+            throw new IllegalArgumentException();
+        }
+
+        return save(entity);
+    }
+
     /**
      * Setting isDeleted flag to specification.
      * If false searching only not deleted entities.
@@ -149,4 +171,6 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
             specificationsBuilder.with("isDeleted", ":", searchForDeleted);
         }
     }
+
+    public abstract boolean verifyEntity(T entity);
 }
