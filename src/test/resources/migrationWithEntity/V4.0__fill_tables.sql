@@ -1,0 +1,1 @@
+INSERT INTO persons (username, password, first_name, last_name, birth_date, is_deleted) VALUES ('Admin', 'admin', 'B6717', 'Tampopo', '1985-02-10', false), ('user1', 'user', 'HG120', 'The Dinner Game', '1985-02-10', false), ('user1', 'user1', 'T_601', 'Yojimbo', '1985-02-10', false);

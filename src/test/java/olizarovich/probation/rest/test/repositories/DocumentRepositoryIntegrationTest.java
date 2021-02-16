@@ -41,9 +41,9 @@ public class DocumentRepositoryIntegrationTest {
     private List<Person> createPersonsData() {
         List<Person> persons = new ArrayList<>();
         LocalDate localDate = LocalDate.of(2000, 1, 1);
-        persons.add(new Person("alex", "xela", localDate));
-        persons.add(new Person("John", "njoJ", localDate));
-        persons.add(new Person("Aasd", "dsaA", localDate));
+        persons.add(new Person("alex", "alex", "alex", "xela", localDate));
+        persons.add(new Person("John", "John", "John", "njoJ", localDate));
+        persons.add(new Person("Aasd", "Aasd", "Aasd", "dsaA", localDate));
 
         return persons;
     }

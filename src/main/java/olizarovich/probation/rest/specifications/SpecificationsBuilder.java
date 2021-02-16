@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 /**
  * Class used to build specifications to search with repository
+ *
  * @param <T> Class specification build for
  */
 public class SpecificationsBuilder<T> {
@@ -24,9 +25,10 @@ public class SpecificationsBuilder<T> {
 
     /**
      * Add to criteria in builder
-     * @param key What we are searching for. Foreign key separated by dot. Example "personAddress.Id"
+     *
+     * @param key       What we are searching for. Foreign key separated by dot. Example "personAddress.Id"
      * @param operation Rules of searching
-     * @param value Value to compare with
+     * @param value     Value to compare with
      * @return SpecificationsBuilder with added criteria
      */
     public SpecificationsBuilder with(String key, String operation, Object value) {
@@ -36,6 +38,7 @@ public class SpecificationsBuilder<T> {
 
     /**
      * Creates specification using all criteria in list
+     *
      * @return Specification with all criteria
      */
     public Specification<T> build() {

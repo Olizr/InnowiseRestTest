@@ -1,26 +1,38 @@
 package olizarovich.probation.rest.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 /**
-* The Person class is data class for holding information
-*/
+ * The Person class is data class for holding information
+ */
 @Entity
+@Table(name = "persons")
 public class Person {
 
     /**
      * Integer field. Contains primary key in class
      */
     @Id
-    @GeneratedValue( strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    /**
+     * String field. Contains username for security
+     */
+    private String username;
+
+    /**
+     * String field. Contains password for security
+     */
+    @JsonIgnore
+    private String password;
 
     /**
      * String field. Contains person first name
@@ -39,9 +51,13 @@ public class Person {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "personId")
+    private Set<Role> roles;
+
     /**
      * Boolean type field. Field for soft delete
      */
+    @JsonIgnore
     private Boolean isDeleted;
 
     /**
@@ -53,11 +69,15 @@ public class Person {
 
     /**
      * Class constructor with all fields
+     *
      * @param firstName String first name
-     * @param lastName String last name
+     * @param lastName  String last name
      * @param birthDate LocalDate birth date
      */
-    public Person(String firstName, String lastName, LocalDate birthDate) {
+    public Person(String username, String password, String firstName,
+                  String lastName, LocalDate birthDate) {
+        this.username = username;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
@@ -66,6 +86,7 @@ public class Person {
 
     /**
      * Uses id, first name and last name to compare objects
+     *
      * @param o Object to compare with
      * @return True if equals, false in other case
      */
@@ -81,6 +102,7 @@ public class Person {
 
     /**
      * Uses id, first name and last name to create hash
+     *
      * @return Object hash code
      */
     @Override
@@ -120,11 +142,38 @@ public class Person {
         this.birthDate = birthDate;
     }
 
-    public Boolean isDeleted() {
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    @JsonProperty
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @JsonIgnore
+    public Boolean getDeleted() {
         return isDeleted;
     }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

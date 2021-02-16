@@ -23,10 +23,13 @@ public class DataInit {
         Random random = new Random();
 
         for (int i = 0; i<count; i++) {
+            String username = nameList[random.nextInt(nameList.length)];
             String name = nameList[random.nextInt(nameList.length)];
             String lastname = nameList[random.nextInt(nameList.length)];
             LocalDate localDate = LocalDate.of(random.nextInt(40) + 1980, random.nextInt(10) + 1, random.nextInt(20) + 1);
-            persons.add(new Person(name, lastname, localDate));
+            Person per = new Person(username, username, name, lastname, localDate);
+            per.setId(0);
+            persons.add(per);
         }
 
         return persons;
@@ -43,6 +46,7 @@ public class DataInit {
         ArrayList<Document> documents = new ArrayList<>();
         String[] documentsStatus = new String[]{"Ready", "In progress", "Unknown"};
 
+        int counter = 0;
         for (Person i : persons) {
             int statusNumber = 0;
             for (Person j : persons) {
@@ -53,9 +57,11 @@ public class DataInit {
                 document.setExecutionPeriod(LocalDate.of(2000, 2, 1).plusMonths(statusNumber));
                 document.setCustomer(i);
                 document.setExecutor(j);
+                document.setId(counter);
 
                 documents.add(document);
                 statusNumber++;
+                counter++;
             }
         }
 

@@ -1,73 +1,118 @@
 package olizarovich.probation.rest.test.services;
 
 import olizarovich.probation.rest.models.Person;
+import olizarovich.probation.rest.models.Role;
+import olizarovich.probation.rest.repositories.PersonRepository;
+import olizarovich.probation.rest.repositories.RoleRepository;
 import olizarovich.probation.rest.services.PersonService;
+import olizarovich.probation.rest.services.implementation.PersonServiceImplementation;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 
 /**
  * Class for testing service layer
  */
-@RunWith(SpringRunner.class)
-@DataJpaTest
+@RunWith(MockitoJUnitRunner.class)
 public class PersonServiceTest {
-    @Autowired
-    private TestEntityManager entityManager;
+    @Mock
+    private PersonRepository mockPersonRepository;
+    @Mock
+    private RoleRepository mockRoleRepository;
+    @Mock
+    private BCryptPasswordEncoder mockBCryptPasswordEncoder;
 
-    @Autowired
     private PersonService service;
+    private Person personToInsert;
+    private Person personToReturn;
+    private Person invalidPerson;
+    private List<Person> personsTestData;
+
+    private Role roleToInsert;
+
+    @Before
+    public void setUp() {
+        service = new PersonServiceImplementation(mockBCryptPasswordEncoder,
+                mockRoleRepository, mockPersonRepository);
+
+        personToInsert = new Person();
+        personToInsert.setId(1);
+        personToInsert.setUsername("Gustavo");
+        personToInsert.setPassword("Gustavo");
+        personToInsert.setFirstName("Gustavo");
+        personToInsert.setLastName("Ponce");
+        personToInsert.setBirthDate(LocalDate.of(2000, 11, 11));
+
+        personToReturn = new Person();
+        personToReturn.setId(2);
+        personToReturn.setUsername("Gust");
+        personToReturn.setPassword("Gust");
+        personToReturn.setFirstName("Guso");
+        personToReturn.setLastName("Pon");
+        personToReturn.setBirthDate(LocalDate.of(2000, 11, 11));
+
+        invalidPerson = new Person();
+
+        roleToInsert = new Role();
+        roleToInsert.setPersonId(1);
+        roleToInsert.setRole("USER");
+
+        personsTestData = DataInit.createPersonsData(5);
+
+        Page<Person> page = new PageImpl<Person>(personsTestData.stream().limit(2).collect(Collectors.toList()));
+
+        Mockito.when(mockPersonRepository.save(any()))
+                .thenReturn(personToInsert);
+        Mockito.when(mockPersonRepository.findAll(any(Specification.class)))
+                .thenReturn(personsTestData);
+        Mockito.when(mockPersonRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(page);
+        Mockito.when(mockPersonRepository.findById(anyInt()))
+                .thenReturn(Optional.of(personToInsert));
+        Mockito.when(mockPersonRepository.findByUsername(anyString()))
+                .thenReturn(null);
+
+        Mockito.when(mockRoleRepository.save(any()))
+                .thenReturn(roleToInsert);
+
+        Mockito.when(mockBCryptPasswordEncoder.encode(anyString()))
+                .thenReturn("password");
+    }
 
     /**
      * Create data and loads it into database
      */
     public List<Person> initData() {
         List<Person> persons = DataInit.createPersonsData(5);
-        loadToDatabase(persons);
         return persons;
-    }
-
-    /**
-     * Add list of persons into database
-     *
-     * @param persons List of persons to add into database
-     */
-    private void loadToDatabase(List<Person> persons) {
-        for (Person i : persons) {
-            entityManager.persist(i);
-            entityManager.flush();
-        }
     }
 
     @Test
     public void findAllServiceTest() {
-        List<Person> persons = initData();
         List<Person> found = new ArrayList<>();
+
         service.findAll().forEach(found::add);
 
-        assertEquals(persons.size(), found.size());
-    }
-
-    @Test
-    public void findAllWithSortServiceTest() {
-        List<Person> persons = initData();
-        List<Person> found = new ArrayList<>();
-
-        service.setSort(PersonService.PersonSort.FIRSTNAME).findAll().forEach(found::add);
-        persons = persons.stream().sorted(Comparator.comparing(Person::getFirstName)).collect(Collectors.toList());
-
-        assertEquals(persons.size(), found.size());
+        assertEquals(personsTestData.size(), found.size());
     }
 
     /**
@@ -76,7 +121,6 @@ public class PersonServiceTest {
     @Test
     public void getPageServiceTest() {
         int pageSize = 2;
-        List<Person> persons = initData();
         List<Person> found = new ArrayList<>();
 
         service.toPage(0, pageSize).forEach(found::add);
@@ -85,34 +129,8 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void findAllWithFilterServiceTest() {
-        List<Person> persons = initData();
-        List<Person> found = new ArrayList<>();
-        String nameToFind = persons.get(1).getFirstName();
-
-        service.filterByFirstName(nameToFind);
-        service.findAll().forEach(found::add);
-
-        persons = persons.stream().filter(p -> p.getFirstName().contains(nameToFind)).collect(Collectors.toList());
-        assertEquals(persons.size(), found.size());
-    }
-
-    @Test
-    public void countWithFilterServiceTest() {
-        List<Person> persons = initData();
-        String nameToFind = persons.get(1).getFirstName();
-
-        service.filterByFirstName(nameToFind);
-
-        persons = persons.stream().filter(p -> p.getFirstName().contains(nameToFind)).collect(Collectors.toList());
-
-        assertEquals(persons.size(), service.count());
-    }
-
-    @Test
     public void getByIdServiceTest() {
-        List<Person> persons = initData();
-        Person toFind = persons.get(2);
+        Person toFind = personToInsert;
         Person found = service.findById(toFind.getId()).get();
 
         assertEquals(toFind, found);
@@ -120,63 +138,25 @@ public class PersonServiceTest {
 
     @Test
     public void saveEntityServiceTest() {
-        List<Person> persons = initData();
-        List<Person> toAdd = DataInit.createPersonsData(2);
-
-        service.saveAll(toAdd);
+        for (Person i : personsTestData) {
+            service.save(i);
+        }
 
         List<Person> found = new ArrayList<>();
         service.findAll().forEach(found::add);
 
-        assertNotEquals(persons.size(), found.size());
+        assertEquals(personsTestData.size(), found.size());
     }
 
-    @Test
-    public void existsByIdServiceTest() {
-        List<Person> persons = initData();
-        Person toFind = persons.get(2);
+    @Test(expected = IllegalArgumentException.class)
+    public void saveInvalidEntityServiceTest() {
+        Person found = service.save(invalidPerson);
 
-        assertTrue(service.existsById(toFind.getId()));
-
-        toFind = persons.get(persons.size() - 1);
-        assertFalse(service.existsById(toFind.getId() + 10));
-    }
-
-    @Test
-    public void deleteByIdServiceTest() {
-        List<Person> persons = initData();
-        List<Person> found = new ArrayList<>();
-        Person toDelete = persons.get(2);
-
-        service.deleteById(toDelete.getId());
-
-        service.searchOnlyInDeleted().findAll().forEach(found::add);
-
-        assertEquals(1, found.size());
-    }
-
-    /**
-     * Testing deletion using persons list.
-     * Searching entity that marked with idDeleted == true
-     */
-    @Test
-    public void deleteAllAndSearchInDeletedServiceTest() {
-        List<Person> persons = initData();
-        List<Person> toDelete = new ArrayList<>();
-
-        for (int i = 0; i < persons.size() / 2; i++) {
-            toDelete.add(persons.get(i));
-        }
-
-        service.deleteAll(toDelete);
-
-        service.searchOnlyInDeleted();
-        long total = service.count();
-        assertEquals(toDelete.size(), total);
+        assertEquals(personToInsert, found);
     }
 
     @AfterEach
-    public void clearService(){
+    public void clearService() {
         service.clearFilter();
     }
 }

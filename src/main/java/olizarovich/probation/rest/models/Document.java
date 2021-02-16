@@ -1,5 +1,7 @@
 package olizarovich.probation.rest.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
@@ -10,13 +12,15 @@ import java.util.Objects;
  * The Document class is data class for holding information
  */
 @Entity
+@Table(name = "documents")
+@JsonSerialize
 public class Document {
 
     /**
      * Integer field. Contains primary key in class
      */
     @Id
-    @GeneratedValue( strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     /**
@@ -46,20 +50,19 @@ public class Document {
     /**
      * Person type field. Contains customer
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Person customer;
 
     /**
      * Person type field. Contains executor
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "executor_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Person executor;
 
     /**
      * Boolean type field. Field for soft delete
      */
+    @JsonIgnore
     private Boolean isDeleted;
 
     /**
@@ -71,6 +74,7 @@ public class Document {
 
     /**
      * Uses id, document title, creationDate to compare objects
+     *
      * @param o Object to compare with
      * @return True if equals, false in other case
      */
@@ -86,6 +90,7 @@ public class Document {
 
     /**
      * Uses id, document title, creationDate to create hash
+     *
      * @return Object hash code
      */
     @Override
@@ -149,10 +154,12 @@ public class Document {
         this.status = status;
     }
 
+    @JsonIgnore
     public Boolean getDeleted() {
         return isDeleted;
     }
 
+    @JsonIgnore
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
     }

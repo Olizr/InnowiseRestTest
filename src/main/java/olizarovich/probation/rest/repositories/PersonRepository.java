@@ -1,26 +1,24 @@
 package olizarovich.probation.rest.repositories;
 
 import olizarovich.probation.rest.models.Person;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Repository for Person entity with soft deletion
  */
 @Repository
 public interface PersonRepository extends CrudSoftDeleteRepository<Person, Integer> {
+
+    /**
+     * Searching for person with giving username
+     * @param username Username to find
+     * @return Person with giving username
+     */
+    Person findByUsername(String username);
+
     /**
      * Soft deleted person by setting column "isDeleted" to true
      * @param id Id of a person to soft delete

@@ -8,6 +8,7 @@ import static olizarovich.probation.rest.specifications.SearchOperation.getSimpl
 
 /**
  * Class for creation search predicate based of SearchCriteria
+ *
  * @param <T> Class in witch we searching
  */
 public class SpecificationImplementation<T> implements Specification<T> {
@@ -50,20 +51,20 @@ public class SpecificationImplementation<T> implements Specification<T> {
 
     /**
      * Creates correct base based on key
-     * @param key Search key
+     *
+     * @param key  Search key
      * @param root Root
-     * @param <R> Type of path
+     * @param <R>  Type of path
      * @return Path with correct path
      */
     private <R> Path<R> buildPath(String key, Root<T> root) {
         String[] keyParts = key.split("\\.");
         Path<R> expression = null;
 
-        for (String i: keyParts) {
+        for (String i : keyParts) {
             if (expression == null) {
                 expression = root.get(i);
-            }
-            else {
+            } else {
                 expression = expression.get(i);
             }
         }

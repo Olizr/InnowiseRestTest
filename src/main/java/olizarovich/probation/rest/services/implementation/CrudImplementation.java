@@ -1,6 +1,5 @@
 package olizarovich.probation.rest.services.implementation;
 
-import olizarovich.probation.rest.models.Person;
 import olizarovich.probation.rest.repositories.CrudSoftDeleteRepository;
 import olizarovich.probation.rest.services.Crud;
 import olizarovich.probation.rest.specifications.SpecificationsBuilder;
@@ -43,7 +42,7 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
 
     @Override
     public T save(T entity) {
-        if(verifyEntity(entity)) {
+        if (verifyEntity(entity)) {
             throw new IllegalArgumentException();
         }
 
@@ -79,7 +78,6 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
     @Override
     public Iterable<T> findAll() {
         setDeletedSearch();
-
         Specification<T> specification = specificationsBuilder.build();
         clearFilter();
 
@@ -153,7 +151,7 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
     public T update(T entity, ID ids) {
         boolean entityIllegal = verifyEntity(entity);
 
-        if(entityIllegal) {
+        if (entityIllegal) {
             throw new IllegalArgumentException();
         }
 

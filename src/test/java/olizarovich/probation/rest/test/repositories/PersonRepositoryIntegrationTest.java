@@ -39,7 +39,7 @@ public class PersonRepositoryIntegrationTest {
         List<Person> persons = new ArrayList<>();
         LocalDate localDate = LocalDate.of(2000, 1, 1);
         for (int i = 0; i < 5; i++) {
-            persons.add(new Person("alex" + i, "xela" + i, localDate));
+            persons.add(new Person("alex" + i, "alex" + i ,"alex" + i, "xela" + i, localDate));
         }
 
         return persons;

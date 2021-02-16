@@ -8,6 +8,8 @@ import olizarovich.probation.rest.services.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -17,7 +19,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/documents")
-@Api(value="Documentrest", description="Operations with Document entity")
+@Api(value="Document rest", description="Operations with Document entity")
 public class DocumentController {
     @Autowired
     private DocumentService service;
@@ -27,7 +29,7 @@ public class DocumentController {
             @ApiResponse(code = 200, message = "Successfully retrieved list"),
             @ApiResponse(code = 400, message = "Incorrect parameter or parameters"),
     })
-    @GetMapping(value = "/",  produces = "application/json")
+    @GetMapping(value = "",  produces = "application/json")
     List<Document> all(@RequestParam(defaultValue = "") String title,
                        @RequestParam(defaultValue = "") String status,
 
@@ -57,9 +59,10 @@ public class DocumentController {
 
                        @RequestParam(defaultValue = "") @ApiParam(value = "Setting sort order") String sort,
                        @RequestParam(defaultValue = "-1") int page,
-                       @RequestParam(defaultValue = "10") int count)
+                       @RequestParam(defaultValue = "10") int count,
+                       Authentication authentication)
     {
-        List<Document> persons = new ArrayList<>();
+        List<Document> documents = new ArrayList<>();
 
         service.filterByTitle(title).filterByStatus(status);
 
@@ -74,24 +77,33 @@ public class DocumentController {
         service.filterByCustomerId(customerId).filterByCustomerLastName(customerLastName);
         service.filterByExecutorId(executorId).filterByExecutorLastName(executorLastName);
 
-        try {
-            DocumentService.DocumentSort personSort = DocumentService.DocumentSort.valueOf(sort);
-            service.setSort(personSort);
+        if (!sort.isEmpty()) {
+            try {
+                DocumentService.DocumentSort personSort = DocumentService.DocumentSort.valueOf(sort);
+                service.setSort(personSort);
+            }
+            catch (IllegalArgumentException ex) {
+                throw new IllegalSortTypeException(sort);
+            }
         }
-        catch (IllegalArgumentException ex) {
-            throw new IllegalSortTypeException(sort);
+
+        /*
+         * If user is admin, then load all documents
+         */
+        if (isUserHasRole(authentication, "ADMIN_ROLE")) {
+            service.includeDeleted();
         }
 
         if (page < 0) {
-            service.findAll().forEach(persons::add);
+            service.findAll().forEach(documents::add);
         }
         else {
-            persons = service.toPage(page, count).toList();
+            documents = service.toPage(page, count).toList();
         }
 
         service.clearFilter();
 
-        return persons;
+        return documents;
     }
 
     @ApiOperation(value = "Add new document to database", response = Document.class)
@@ -100,7 +112,7 @@ public class DocumentController {
             @ApiResponse(code = 400, message = "Incorrect document entity"),
             @ApiResponse(code = 401, message = "You are not authorized"),
     })
-    @PostMapping("/")
+    @PostMapping("")
     @ResponseStatus(HttpStatus.OK)
     Document newPerson(@RequestBody Document document) {
         return service.save(document);
@@ -148,5 +160,21 @@ public class DocumentController {
     @ResponseStatus(HttpStatus.OK)
     void deletePerson(@PathVariable Integer id) {
         service.deleteById(id);
+    }
+
+    private boolean isUserHasRole(Authentication authentication, String role) {
+        boolean hasRole = false;
+        try {
+            for (GrantedAuthority i : authentication.getAuthorities()) {
+                hasRole = i.getAuthority().equals(role);
+                if (hasRole) {
+                    return true;
+                }
+            }
+        }catch (NullPointerException ex) {
+            hasRole = false;
+        }
+
+        return hasRole;
     }
 }

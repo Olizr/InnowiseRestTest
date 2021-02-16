@@ -117,7 +117,7 @@ public class ManualFlywayMigrationIntegrationTest {
         int result = -1;
 
         Statement stmt = con.createStatement();
-        String query = "select count(*) from Person";
+        String query = "select count(*) from persons";
 
         ResultSet rs = stmt.executeQuery(query);
         rs.next();
