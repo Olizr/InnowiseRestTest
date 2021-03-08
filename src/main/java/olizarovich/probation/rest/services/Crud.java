@@ -44,6 +44,13 @@ public interface Crud<T, ID> {
     Crud<T, ID> searchOnlyInDeleted();
 
     /**
+     * Searching for soft deleted entities only
+     *
+     * @return Interface for further settings
+     */
+    Crud<T, ID> setPage(int page, int size);
+
+    /**
      * Searching for soft deleted and not deleted entities
      *
      * @return Interface for further settings

@@ -73,10 +73,10 @@ public class PersonController {
         }
 
         if (page < 0) {
-            service.findAll().forEach(persons::add);
-        } else {
-            persons = service.toPage(page, count).toList();
+            service.setPage(page, count);
         }
+
+        service.findAll().forEach(persons::add);
 
         service.clearFilter();
 

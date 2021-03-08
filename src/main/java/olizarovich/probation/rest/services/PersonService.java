@@ -9,8 +9,6 @@ import java.time.LocalDate;
 
 @Service
 public interface PersonService extends Crud<Person, Integer>, UserDetailsService {
-    Page<Person> toPage(int page, int count);
-
     PersonService setSort(PersonService.PersonSort sort);
 
     Person findByUsername(String username);

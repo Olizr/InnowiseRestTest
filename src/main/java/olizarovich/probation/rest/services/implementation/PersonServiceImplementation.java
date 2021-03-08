@@ -46,26 +46,6 @@ public class PersonServiceImplementation extends CrudImplementation<Person, Inte
         this.repository = personRepository;
     }
 
-    /**
-     * Creating page, sets sort (if needed) and making pagination request
-     * @param page Page number
-     * @param count Entity count for one page
-     * @return Page with entities
-     */
-    @Override
-    public Page<Person> toPage(int page, int count) {
-        PageRequest pageRequest;
-        if (sort == null)
-            pageRequest = PageRequest.of(page, count);
-        else
-            pageRequest = PageRequest.of(page, count, sort);
-
-        setDeletedSearch();
-        Specification<Person> specification = specificationsBuilder.build();
-        clearFilter();
-        return repository.findAll(specification, pageRequest);
-    }
-
     @Override
     public Person update(Person person, Integer ids) {
         boolean entityIllegal = verifyEntity(person);
@@ -132,7 +112,7 @@ public class PersonServiceImplementation extends CrudImplementation<Person, Inte
 
     @Override
     public PersonService setSort(PersonSort sort) {
-        this.sort = Sort.by(sort.getSortOrder());
+        this.pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sort.getSortOrder()));
         return this;
     }
 

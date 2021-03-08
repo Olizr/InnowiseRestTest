@@ -95,11 +95,10 @@ public class DocumentController {
         }
 
         if (page < 0) {
-            service.findAll().forEach(documents::add);
+            service.setPage(page, count);
         }
-        else {
-            documents = service.toPage(page, count).toList();
-        }
+
+        service.findAll().forEach(documents::add);
 
         service.clearFilter();
 

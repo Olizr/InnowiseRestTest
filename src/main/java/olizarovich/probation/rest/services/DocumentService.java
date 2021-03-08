@@ -8,8 +8,6 @@ import java.time.LocalDate;
 
 @Service
 public interface DocumentService extends Crud<Document, Integer> {
-    Page<Document> toPage(int page, int count);
-
     DocumentService setSort(DocumentService.DocumentSort sort);
 
     DocumentService filterByTitle(String title);

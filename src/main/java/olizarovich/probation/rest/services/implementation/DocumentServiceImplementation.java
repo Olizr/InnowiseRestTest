@@ -4,6 +4,7 @@ import olizarovich.probation.rest.exceptions.DocumentNotFoundException;
 import olizarovich.probation.rest.models.Document;
 import olizarovich.probation.rest.repositories.DocumentRepository;
 import olizarovich.probation.rest.services.DocumentService;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,27 +24,6 @@ public class DocumentServiceImplementation extends CrudImplementation<Document, 
         this.repository = repository;
     }
 
-    /**
-     * Creating page, sets sort (if needed) and making pagination request
-     *
-     * @param page  Page number
-     * @param count Entity count for one page
-     * @return Page with entities
-     */
-    public Page<Document> toPage(int page, int count) {
-        PageRequest pageRequest;
-        if (sort == null)
-            pageRequest = PageRequest.of(page, count);
-        else
-            pageRequest = PageRequest.of(page, count, sort);
-
-        setDeletedSearch();
-        Specification<Document> specification = specificationsBuilder.build();
-        clearFilter();
-
-        return repository.findAll(specification, pageRequest);
-    }
-
     @Override
     public Document update(Document document, Integer ids) {
         boolean entityIllegal = verifyEntity(document);
@@ -61,7 +41,7 @@ public class DocumentServiceImplementation extends CrudImplementation<Document, 
 
     @Override
     public DocumentService setSort(DocumentService.DocumentSort sort) {
-        this.sort = Sort.by(sort.getSortOrder());
+        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(sort.getSortOrder()));
         return this;
     }
 

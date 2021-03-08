@@ -32,13 +32,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RestResponseEntityExceptionHandler restResponseEntityExceptionHandler;
-
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    @Autowired
-    private RestAuthenticationEntryPoint authenticationEntryPoint;
 
     @Autowired
     private PersonService service;

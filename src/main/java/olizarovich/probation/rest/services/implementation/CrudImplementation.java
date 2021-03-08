@@ -3,6 +3,8 @@ package olizarovich.probation.rest.services.implementation;
 import olizarovich.probation.rest.repositories.CrudSoftDeleteRepository;
 import olizarovich.probation.rest.services.Crud;
 import olizarovich.probation.rest.specifications.SpecificationsBuilder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,11 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
      * Repository with soft deletion
      */
     protected CrudSoftDeleteRepository<T, ID> repository;
+
+    /**
+     * Contains sort type. If null not used if search.
+     */
+    protected Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
 
     /**
      * Contains sort type. If null not used if search.
@@ -81,10 +88,7 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
         Specification<T> specification = specificationsBuilder.build();
         clearFilter();
 
-        if (sort == null)
-            return repository.findAll(specification);
-        else
-            return repository.findAll(specification, sort);
+        return repository.findAll(specification, pageable);
     }
 
     @Override
@@ -144,6 +148,7 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
     public void clearFilter() {
         specificationsBuilder = new SpecificationsBuilder<>();
         sort = null;
+        pageable = PageRequest.of(0, Integer.MAX_VALUE);
         searchForDeleted = false;
     }
 
@@ -156,6 +161,15 @@ public abstract class CrudImplementation<T, ID> implements Crud<T, ID> {
         }
 
         return save(entity);
+    }
+
+    public Crud<T, ID> setPage(int page, int size) {
+        if (sort != null)
+            pageable = PageRequest.of(page, size, sort);
+        else
+            pageable = PageRequest.of(page, size);
+
+        return this;
     }
 
     /**
